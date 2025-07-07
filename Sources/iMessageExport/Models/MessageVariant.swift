@@ -366,10 +366,10 @@ public enum ShareStatus: Sendable, Hashable, Codable {
         case (false, _):
             return .notShared
 
-        case (true, true):
+        case (true, .some(true)):
             return .sharing
 
-        case (true, false):
+        case (true, .some(false)):
             return .ended
 
         case (true, nil):
