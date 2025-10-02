@@ -13,7 +13,6 @@ public enum MarkdownExportExample {
         // Create markdown exporter with custom options
         let options = MarkdownExportOptions(
             attachmentsDirectory: "./attachments",
-            includeReactions: true,
             includeSystemMessages: false,
             maxQuoteLength: 150
         )
@@ -118,7 +117,6 @@ public enum MarkdownExportExample {
         // Create custom export options
         let options = MarkdownExportOptions(
             attachmentsDirectory: "./attachments",
-            includeReactions: true,
             includeSystemMessages: false,
             maxQuoteLength: 100,
             dateRange: DateRange.lastDays(7), // Only last 7 days

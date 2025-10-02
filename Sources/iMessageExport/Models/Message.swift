@@ -54,9 +54,7 @@ public struct Message: Sendable, Hashable, Codable, Identifiable {
     public let threadOriginatorPart: String?
     /// Date the message was edited
     public let dateEdited: Int64?
-    /// Emoji associated with the message
-    public let associatedMessageEmoji: String?
-    
+
     // Additional computed fields
     /// Chat ID this message belongs to
     public let chatId: Int32?
@@ -96,7 +94,6 @@ public struct Message: Sendable, Hashable, Codable, Identifiable {
         threadOriginatorGuid: String? = nil,
         threadOriginatorPart: String? = nil,
         dateEdited: Int64? = nil,
-        associatedMessageEmoji: String? = nil,
         chatId: Int32? = nil,
         numAttachments: Int32 = 0,
         deletedFrom: Int32? = nil,
@@ -128,7 +125,6 @@ public struct Message: Sendable, Hashable, Codable, Identifiable {
         self.threadOriginatorGuid = threadOriginatorGuid
         self.threadOriginatorPart = threadOriginatorPart
         self.dateEdited = dateEdited
-        self.associatedMessageEmoji = associatedMessageEmoji
         self.chatId = chatId
         self.numAttachments = numAttachments
         self.deletedFrom = deletedFrom
@@ -249,7 +245,7 @@ public struct Message: Sendable, Hashable, Codable, Identifiable {
         }
         
         // Priority 2: Associated message types (reactions/tapbacks)
-        if let (action, tapback) = Tapback.from(associatedMessageType: associatedMessageType, emoji: associatedMessageEmoji) {
+        if let (action, tapback) = Tapback.from(associatedMessageType: associatedMessageType) {
             return .tapback(action, tapback)
         }
         

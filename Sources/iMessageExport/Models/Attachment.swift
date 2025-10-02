@@ -118,9 +118,7 @@ public struct Attachment: Sendable, Hashable, Codable, Identifiable {
     public let isSticker: Bool
     /// Whether this attachment should be hidden
     public let hideAttachment: Bool
-    /// Short description for emoji images
-    public let emojiImageShortDescription: String?
-    
+
     public var id: Int32 { rowid }
     
     public init(
@@ -132,7 +130,6 @@ public struct Attachment: Sendable, Hashable, Codable, Identifiable {
         totalBytes: Int64? = nil,
         isSticker: Bool = false,
         hideAttachment: Bool = false,
-        emojiImageShortDescription: String? = nil
     ) {
         self.rowid = rowid
         self.filename = filename
@@ -142,7 +139,6 @@ public struct Attachment: Sendable, Hashable, Codable, Identifiable {
         self.totalBytes = totalBytes
         self.isSticker = isSticker
         self.hideAttachment = hideAttachment
-        self.emojiImageShortDescription = emojiImageShortDescription
     }
     
     /// The media type of this attachment

@@ -7,8 +7,6 @@ public typealias ContactLookupFunction = @Sendable (String) async -> String?
 public struct MarkdownExportOptions: Sendable {
     /// Directory path where attachment files should be copied
     public let attachmentsDirectory: String
-    /// Whether to include reactions in the export
-    public let includeReactions: Bool
     /// Whether to include system messages and announcements
     public let includeSystemMessages: Bool
     /// Maximum length for quoted message context (0 = unlimited)
@@ -26,7 +24,6 @@ public struct MarkdownExportOptions: Sendable {
     
     public init(
         attachmentsDirectory: String = "./attachments",
-        includeReactions: Bool = true,
         includeSystemMessages: Bool = false,
         maxQuoteLength: Int = 150,
         dateRange: DateRange? = nil,
@@ -36,7 +33,6 @@ public struct MarkdownExportOptions: Sendable {
         contactLookup: ContactLookupFunction? = nil
     ) {
         self.attachmentsDirectory = attachmentsDirectory
-        self.includeReactions = includeReactions
         self.includeSystemMessages = includeSystemMessages
         self.maxQuoteLength = maxQuoteLength
         self.dateRange = dateRange
@@ -159,7 +155,6 @@ public final class MarkdownExporter: Sendable {
         var threadOptions = options
         threadOptions = MarkdownExportOptions(
             attachmentsDirectory: threadOptions.attachmentsDirectory,
-            includeReactions: threadOptions.includeReactions,
             includeSystemMessages: threadOptions.includeSystemMessages,
             maxQuoteLength: threadOptions.maxQuoteLength,
             dateRange: threadOptions.dateRange,
@@ -178,7 +173,6 @@ public final class MarkdownExporter: Sendable {
         var limitedOptions = options
         limitedOptions = MarkdownExportOptions(
             attachmentsDirectory: limitedOptions.attachmentsDirectory,
-            includeReactions: limitedOptions.includeReactions,
             includeSystemMessages: limitedOptions.includeSystemMessages,
             maxQuoteLength: limitedOptions.maxQuoteLength,
             dateRange: limitedOptions.dateRange,
@@ -197,7 +191,6 @@ public final class MarkdownExporter: Sendable {
         var dateRangeOptions = options
         dateRangeOptions = MarkdownExportOptions(
             attachmentsDirectory: dateRangeOptions.attachmentsDirectory,
-            includeReactions: dateRangeOptions.includeReactions,
             includeSystemMessages: dateRangeOptions.includeSystemMessages,
             maxQuoteLength: dateRangeOptions.maxQuoteLength,
             dateRange: dateRange,
@@ -216,7 +209,6 @@ public final class MarkdownExporter: Sendable {
         var threadsOptions = options
         threadsOptions = MarkdownExportOptions(
             attachmentsDirectory: threadsOptions.attachmentsDirectory,
-            includeReactions: threadsOptions.includeReactions,
             includeSystemMessages: threadsOptions.includeSystemMessages,
             maxQuoteLength: threadsOptions.maxQuoteLength,
             dateRange: threadsOptions.dateRange,
@@ -635,11 +627,6 @@ public final class MarkdownExporter: Sendable {
             // Export parent message
             output += try await formatMessage(group.parentMessage, handleMapping: handleMapping)
             
-            // Add reactions if enabled
-            if options.includeReactions && !group.reactions.isEmpty {
-                output += await formatReactions(group.reactions, handleMapping: handleMapping)
-            }
-            
             output += "\n---\n\n"
             
             // Export replies
@@ -658,11 +645,6 @@ public final class MarkdownExporter: Sendable {
             let includeByType: Bool = {
                 // Always include normal messages
                 if message.isNormalMessage {
-                    return true
-                }
-                
-                // Include reactions if enabled
-                if options.includeReactions && message.isReaction {
                     return true
                 }
                 
@@ -830,21 +812,6 @@ public final class MarkdownExporter: Sendable {
         return output
     }
     
-    private func formatReactions(_ reactions: [Message], handleMapping: [Int32: String]) async -> String {
-        var reactionList: [String] = []
-        
-        for reaction in reactions {
-            let username = await formatUsername(message: reaction, handleMapping: handleMapping)
-            if let emoji = reaction.associatedMessageEmoji {
-                reactionList.append("\(username) \(emoji)")
-            }
-        }
-        
-        guard !reactionList.isEmpty else { return "" }
-        
-        return "[Reactions: \(reactionList.joined(separator: ", "))]\n\n"
-    }
-    
     private func formatAttachment(_ attachment: Attachment) -> String {
         // Use just the filename component, not the full path
         let originalPath: String
@@ -867,12 +834,7 @@ public final class MarkdownExporter: Sendable {
         
         let path = "\(options.attachmentsDirectory)/\(filename)"
         
-        var output = "[Attachment: \(filename)](\(path))"
-        
-        // Add description for images or other media
-        if let description = attachment.emojiImageShortDescription {
-            output += "\n\n_\(description)_"
-        }
+        let output = "[Attachment: \(filename)](\(path))"
         
         return output
     }

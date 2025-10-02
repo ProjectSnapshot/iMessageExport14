@@ -14,7 +14,7 @@ public final class AttachmentRepository: Sendable {
     public func fetchAllAttachments() async throws -> [Attachment] {
         let query = """
             SELECT ROWID as rowid, filename, uti, mime_type, transfer_name, total_bytes, 
-                   is_sticker, hide_attachment, emoji_image_short_description
+                   is_sticker, hide_attachment
             FROM attachment
             ORDER BY rowid
         """
@@ -29,7 +29,7 @@ public final class AttachmentRepository: Sendable {
     public func fetchAttachment(withId attachmentId: Int32) async throws -> Attachment? {
         let query = """
             SELECT ROWID as rowid, filename, uti, mime_type, transfer_name, total_bytes, 
-                   is_sticker, hide_attachment, emoji_image_short_description
+                   is_sticker, hide_attachment
             FROM attachment
             WHERE rowid = \(attachmentId)
             LIMIT 1
@@ -45,7 +45,7 @@ public final class AttachmentRepository: Sendable {
     public func fetchAttachments(forMessageId messageId: Int32) async throws -> [Attachment] {
         let query = """
             SELECT a.ROWID as rowid, a.filename, a.uti, a.mime_type, a.transfer_name, a.total_bytes, 
-                   a.is_sticker, a.hide_attachment, a.emoji_image_short_description
+                   a.is_sticker, a.hide_attachment
             FROM attachment a
             JOIN message_attachment_join maj ON a.rowid = maj.attachment_id
             WHERE maj.message_id = \(messageId)
@@ -62,7 +62,7 @@ public final class AttachmentRepository: Sendable {
     public func fetchAttachments(withMimeType mimeType: String) async throws -> [Attachment] {
         let query = """
             SELECT ROWID as rowid, filename, uti, mime_type, transfer_name, total_bytes, 
-                   is_sticker, hide_attachment, emoji_image_short_description
+                   is_sticker, hide_attachment
             FROM attachment
             WHERE mime_type = '\(mimeType)'
             ORDER BY rowid
@@ -78,7 +78,7 @@ public final class AttachmentRepository: Sendable {
     public func fetchImageAttachments() async throws -> [Attachment] {
         let query = """
             SELECT ROWID as rowid, filename, uti, mime_type, transfer_name, total_bytes, 
-                   is_sticker, hide_attachment, emoji_image_short_description
+                   is_sticker, hide_attachment
             FROM attachment
             WHERE mime_type LIKE 'image/%'
             ORDER BY rowid
@@ -94,7 +94,7 @@ public final class AttachmentRepository: Sendable {
     public func fetchVideoAttachments() async throws -> [Attachment] {
         let query = """
             SELECT ROWID as rowid, filename, uti, mime_type, transfer_name, total_bytes, 
-                   is_sticker, hide_attachment, emoji_image_short_description
+                   is_sticker, hide_attachment
             FROM attachment
             WHERE mime_type LIKE 'video/%'
             ORDER BY rowid
@@ -110,7 +110,7 @@ public final class AttachmentRepository: Sendable {
     public func fetchAudioAttachments() async throws -> [Attachment] {
         let query = """
             SELECT ROWID as rowid, filename, uti, mime_type, transfer_name, total_bytes, 
-                   is_sticker, hide_attachment, emoji_image_short_description
+                   is_sticker, hide_attachment
             FROM attachment
             WHERE mime_type LIKE 'audio/%'
             ORDER BY rowid
@@ -126,7 +126,7 @@ public final class AttachmentRepository: Sendable {
     public func fetchStickerAttachments() async throws -> [Attachment] {
         let query = """
             SELECT ROWID as rowid, filename, uti, mime_type, transfer_name, total_bytes, 
-                   is_sticker, hide_attachment, emoji_image_short_description
+                   is_sticker, hide_attachment
             FROM attachment
             WHERE is_sticker = 1
             ORDER BY rowid
@@ -145,8 +145,8 @@ public final class AttachmentRepository: Sendable {
         let videoQuery = "SELECT COUNT(*) as count FROM attachment WHERE mime_type LIKE 'video/%'"
         let audioQuery = "SELECT COUNT(*) as count FROM attachment WHERE mime_type LIKE 'audio/%'"
         let stickerQuery = "SELECT COUNT(*) as count FROM attachment WHERE is_sticker = 1"
-        let totalSizeQuery = "SELECT SUM(total_bytes) as total_size FROM attachment WHERE total_bytes IS NOT NULL"
-        
+        let totalSizeQuery = "SELECT SUM(total_bytes) as total_size FROM attachment WHERE total_bytes IS NOT NULL AND total_bytes > 0"
+
         let totalResults = try connection.execute(totalQuery)
         let imageResults = try connection.execute(imageQuery)
         let videoResults = try connection.execute(videoQuery)
@@ -185,8 +185,7 @@ public final class AttachmentRepository: Sendable {
             transferName: row["transfer_name"] as? String,
             totalBytes: row["total_bytes"] as? Int64,
             isSticker: ((row["is_sticker"] as? Int64) ?? 0) != 0,
-            hideAttachment: ((row["hide_attachment"] as? Int64) ?? 0) != 0,
-            emojiImageShortDescription: row["emoji_image_short_description"] as? String
+            hideAttachment: ((row["hide_attachment"] as? Int64) ?? 0) != 0
         )
     }
 }
